@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+.venv/
+dist/
+build/
+
+# YOLO model weights (auto-downloaded)
+*.pt
+runs/
+
+# Data output (can get large)
+data/*.csv
+data/screenshot_*.jpg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker volumes
+influxdb-data/
+grafana-data/
+
+# Environment
+.env
