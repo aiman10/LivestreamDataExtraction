@@ -37,6 +37,7 @@ class ThresholdEventEngine:
         self.events = []
         self.prev_umbrella_count = 0
         self.prev_is_daytime = None
+        self.prev_friendliness_index = None
 
     def _can_fire(self, event_type, now):
         """Check if enough time has passed since last event of this type."""
@@ -144,6 +145,43 @@ class ThresholdEventEngine:
                     "Scene is completely empty with no motion",
                     scene_state,
                 ))
+
+        # --- Wave detected ---
+        wave_count = metrics.get("wave_count", 0)
+        if wave_count > 0:
+            if self._can_fire("wave_detected", timestamp):
+                fired.append(self._emit(
+                    timestamp, "wave_detected", "INFO",
+                    wave_count, 1,
+                    f"Wave gesture detected ({wave_count} in this cycle)",
+                    scene_state,
+                ))
+
+        # --- Engagement level crossings ---
+        friendliness = metrics.get("friendliness_index")
+        if friendliness is not None and self.prev_friendliness_index is not None:
+            # Crossed up above spike threshold
+            if (friendliness >= config.ENGAGEMENT_SPIKE_THRESHOLD
+                    and self.prev_friendliness_index < config.ENGAGEMENT_SPIKE_THRESHOLD):
+                if self._can_fire("engagement_spike", timestamp):
+                    fired.append(self._emit(
+                        timestamp, "engagement_spike", "INFO",
+                        friendliness, config.ENGAGEMENT_SPIKE_THRESHOLD,
+                        f"Friendliness index crossed above {config.ENGAGEMENT_SPIKE_THRESHOLD}",
+                        scene_state,
+                    ))
+            # Crossed down below drop threshold (only if previously above min)
+            elif (friendliness < config.ENGAGEMENT_DROP_THRESHOLD
+                    and self.prev_friendliness_index >= config.ENGAGEMENT_DROP_PREVIOUS_MIN):
+                if self._can_fire("engagement_drop", timestamp):
+                    fired.append(self._emit(
+                        timestamp, "engagement_drop", "INFO",
+                        friendliness, config.ENGAGEMENT_DROP_THRESHOLD,
+                        f"Friendliness index dropped below {config.ENGAGEMENT_DROP_THRESHOLD}",
+                        scene_state,
+                    ))
+        if friendliness is not None:
+            self.prev_friendliness_index = friendliness
 
         return fired
 

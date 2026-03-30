@@ -348,3 +348,53 @@ class ObjectExtractor:
             )
 
         return frame
+
+
+# ============================================================
+# LAYER 5: Engagement / Friendliness metrics
+# ============================================================
+
+def extract_engagement_metrics(frame, person_detections, timestamp,
+                                wave_detector, photo_detector,
+                                friendliness_index):
+    """
+    Run engagement detection and compute friendliness score.
+
+    Orchestrates the WaveDetector, PhotoStopDetector, and FriendlinessIndex
+    classes to produce a single metrics dict.
+
+    Args:
+        frame: BGR image (numpy array)
+        person_detections: List of detection dicts where class == "person",
+                          each with "bbox": (x1, y1, x2, y2)
+        timestamp: datetime (UTC)
+        wave_detector: WaveDetector instance
+        photo_detector: PhotoStopDetector instance
+        friendliness_index: FriendlinessIndex instance
+
+    Returns:
+        dict with wave_count, total_waves, photo_stop_count,
+        total_photo_stops, friendliness_index, friendliness_level
+    """
+    # Detect waves (requires frame for MediaPipe pose)
+    wave_data = wave_detector.detect(frame, person_detections, timestamp)
+
+    # Detect photo-stops (centroid tracking only, no frame needed)
+    stop_data = photo_detector.detect(person_detections, timestamp)
+
+    # Record events into the friendliness index
+    friendliness_index.record_waves(timestamp, wave_data["wave_count"])
+    friendliness_index.record_stops(timestamp, stop_data["photo_stop_count"])
+
+    # Compute rolling friendliness score
+    friendliness_data = friendliness_index.compute(timestamp)
+
+    # Merge all results into a flat dict
+    return {
+        "wave_count": wave_data["wave_count"],
+        "total_waves": wave_data["total_waves"],
+        "photo_stop_count": stop_data["photo_stop_count"],
+        "total_photo_stops": stop_data["total_photo_stops"],
+        "friendliness_index": friendliness_data["friendliness_index"],
+        "friendliness_level": friendliness_data["friendliness_level"],
+    }

@@ -58,6 +58,11 @@ def import_metrics(write_api, bucket):
                     "saturation": float,
                     "color_temp": float,
                     "green_ratio": float,
+                    "wave_count": int,
+                    "total_waves": int,
+                    "photo_stop_count": int,
+                    "total_photo_stops": int,
+                    "friendliness_index": float,
                 }
 
                 for field_name, cast_fn in numeric_fields.items():
@@ -75,7 +80,7 @@ def import_metrics(write_api, bucket):
                         point.field(bool_field, value.lower() in ("true", "1", "yes"))
 
                 # Tag fields (indexed, used for filtering/grouping)
-                for tag_field in ["crowd_density", "activity_level", "scene_state"]:
+                for tag_field in ["crowd_density", "activity_level", "scene_state", "friendliness_level"]:
                     value = row.get(tag_field, "")
                     if value:
                         point.tag(tag_field, value)

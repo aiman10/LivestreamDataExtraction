@@ -10,7 +10,7 @@ yt-dlp>=2024.1.0
 ultralytics>=8.0.0
 
 # Pose estimation (optional, for gesture detection)
-# mediapipe>=0.10.0
+mediapipe==0.10.14
 
 # InfluxDB integration (for Grafana dashboard)
 influxdb-client>=1.36.0

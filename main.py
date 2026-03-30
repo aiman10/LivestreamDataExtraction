@@ -23,6 +23,7 @@ import config
 from stream_capture import LivestreamReader
 from feature_extractors import (
     extract_scene_metrics,
+    extract_engagement_metrics,
     MotionExtractor,
     FlowExtractor,
     ObjectExtractor,
@@ -73,26 +74,25 @@ def draw_overlay(frame, metrics, scene_state, stats):
     h, w = frame.shape[:2]
 
     # Background rectangle
-    cv2.rectangle(overlay, (10, 10), (320, 230), (0, 0, 0), -1)
+    overlay_height = 180
+    cv2.rectangle(overlay, (10, 10), (380, 10 + overlay_height), (0, 0, 0), -1)
     cv2.addWeighted(overlay, 0.6, frame, 0.4, 0, frame)
 
     # Text lines
     lines = [
         f"State: {scene_state.upper()}",
-        f"People: {metrics.get('person_count', '?')}  "
-        f"Vehicles: {metrics.get('vehicle_count', '?')}",
-        f"Motion: {metrics.get('motion_pct', '?')}%  "
+        f"People: {metrics.get('person_count', '?')} Motion: {metrics.get('motion_pct', '?')}%  "
         f"Activity: {metrics.get('activity_level', '?')}",
         f"Brightness: {metrics.get('brightness', '?')}  "
         f"Daytime: {metrics.get('is_daytime', '?')}",
         f"Umbrellas: {metrics.get('umbrella_count', '?')}  "
         f"Rain: {metrics.get('is_raining', '?')}",
-        f"Flow dir: {metrics.get('dominant_flow_dir', '?')}"
-        + chr(176)  # degree symbol
-        + f"  Speed: {metrics.get('avg_flow_speed', '?')}",
-        f"Color temp: {metrics.get('color_temp', '?')}",
         f"Logged: {stats['metrics_rows']} rows, "
         f"{stats['events_rows']} events",
+        f"Friendliness: {metrics.get('friendliness_index', '?')}/100 "
+        f"({metrics.get('friendliness_level', '?')})",
+        f"Waves: {metrics.get('total_waves', 0)}  "
+        f"Photo-stops: {metrics.get('total_photo_stops', 0)}",
     ]
 
     y = 35
@@ -157,6 +157,22 @@ def main():
             model_name=config.YOLO_MODEL,
             confidence=config.YOLO_CONFIDENCE,
         )
+
+    # Phase 2b: Engagement detectors (requires MediaPipe)
+    wave_detector = None
+    photo_detector = None
+    friendliness = None
+    if use_yolo:
+        try:
+            from engagement_detector import (
+                WaveDetector, PhotoStopDetector, FriendlinessIndex,
+            )
+            wave_detector = WaveDetector()
+            photo_detector = PhotoStopDetector()
+            friendliness = FriendlinessIndex()
+            print("  Engagement detectors initialized (MediaPipe loaded)")
+        except ImportError:
+            print("  MediaPipe not available, engagement detection disabled")
 
     # Phase 3: Event engine
     print("[3/5] Setting up event engine...")
@@ -231,6 +247,17 @@ def main():
             transition = state_machine.update(person_count)
             if transition:
                 print(f"  STATE CHANGE: {transition}")
+
+        # --- LAYER 5: Engagement detection (every N frames) ---
+        if (wave_detector is not None
+                and frame_count % config.ENGAGEMENT_EVERY == 0
+                and last_detections):
+            person_dets = [d for d in last_detections if d["class"] == "person"]
+            engagement_data = extract_engagement_metrics(
+                frame, person_dets, timestamp,
+                wave_detector, photo_detector, friendliness,
+            )
+            current_metrics.update(engagement_data)
 
         # --- Current state ---
         scene_state = state_machine.get_state()

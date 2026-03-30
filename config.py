@@ -71,6 +71,38 @@ STATE_BUSY_TO_NORMAL = 15
 STATE_NORMAL_TO_QUIET = 3
 
 # ============================================================
+# ENGAGEMENT / FRIENDLINESS DETECTION
+# ============================================================
+ENGAGEMENT_EVERY = 5            # Run engagement analysis every N frames
+
+# Wave detection (MediaPipe Pose on YOLO person crops)
+WAVE_MIN_BOX_WIDTH = 50         # Minimum person bbox width in pixels
+WAVE_MIN_BOX_HEIGHT = 100       # Minimum person bbox height in pixels
+WAVE_MAX_PERSONS = 5            # Max persons to run pose estimation on per frame
+WAVE_WRIST_ABOVE_SHOULDER_THRESHOLD = 0.15  # Normalized y-distance wrist must be above shoulder
+WAVE_LATERAL_MOVEMENT_THRESHOLD = 0.03      # Min lateral oscillation to count as wave
+WAVE_OSCILLATION_WINDOW = 10    # Frames to track wrist x-positions for oscillation
+WAVE_MIN_DIRECTION_CHANGES = 2  # Min direction reversals to count as wave
+WAVE_COOLDOWN_SECONDS = 3       # Cooldown per tracked person before re-counting a wave
+
+# Photo-stop detection (stationary person tracking)
+PHOTO_STOP_STATIONARY_FRAMES = 15       # Consecutive frames a person must be still
+PHOTO_STOP_MOVEMENT_THRESHOLD = 20      # Max centroid pixel movement to count as stationary
+PHOTO_STOP_MATCH_DISTANCE = 50          # Max centroid distance for cross-frame matching
+
+# Friendliness index
+FRIENDLINESS_WINDOW_MINUTES = 5         # Rolling window duration
+FRIENDLINESS_MAX_WAVES = 10             # Wave count that maps to 100 on wave component
+FRIENDLINESS_MAX_STOPS = 8              # Photo-stop count that maps to 100 on stop component
+FRIENDLINESS_WAVE_WEIGHT = 0.6          # Weight of wave component in combined score
+FRIENDLINESS_STOP_WEIGHT = 0.4          # Weight of photo-stop component in combined score
+
+# Engagement event thresholds
+ENGAGEMENT_SPIKE_THRESHOLD = 70         # Friendliness index above this triggers spike event
+ENGAGEMENT_DROP_THRESHOLD = 20          # Friendliness index below this triggers drop event
+ENGAGEMENT_DROP_PREVIOUS_MIN = 40       # Previous index must be above this for drop to fire
+
+# ============================================================
 # DATA STORAGE
 # ============================================================
 METRICS_CSV_PATH = "data/metrics.csv"

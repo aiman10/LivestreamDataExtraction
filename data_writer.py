@@ -37,6 +37,12 @@ METRICS_FIELDS = [
     "is_daytime",
     "green_ratio",
     "scene_state",
+    "wave_count",
+    "total_waves",
+    "photo_stop_count",
+    "total_photo_stops",
+    "friendliness_index",
+    "friendliness_level",
 ]
 
 EVENTS_FIELDS = [
