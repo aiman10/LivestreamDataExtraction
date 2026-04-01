@@ -25,6 +25,7 @@ import config
 from stream_capture import LivestreamReader
 from object_detector import ObjectDetector
 from wave_detector import WaveDetector
+from photo_detector import PhotoTakingDetector
 
 
 def parse_args():
@@ -34,7 +35,8 @@ def parse_args():
     return parser.parse_args()
 
 
-def draw_counts_overlay(frame, summary: dict, fps: float, waving: int = 0):
+def draw_counts_overlay(frame, summary: dict, fps: float,
+                        waving: int = 0, photo_taking: int = 0):
     """
     Draw a compact object-count overlay in the top-left corner.
     """
@@ -42,7 +44,7 @@ def draw_counts_overlay(frame, summary: dict, fps: float, waving: int = 0):
     h, w = frame.shape[:2]
 
     # Semi-transparent black background
-    box_h = 152
+    box_h = 174
     box_w = 300
     cv2.rectangle(overlay, (8, 8), (8 + box_w, 8 + box_h), (0, 0, 0), -1)
     cv2.addWeighted(overlay, 0.55, frame, 0.45, 0, frame)
@@ -71,6 +73,9 @@ def draw_counts_overlay(frame, summary: dict, fps: float, waving: int = 0):
     y += 22
     wave_color = (0, 255, 255) if waving > 0 else white
     cv2.putText(frame, f"Waving: {waving}", (16, y), font, 0.45, wave_color, 1)
+    y += 22
+    photo_color = (255, 100, 255) if photo_taking > 0 else white
+    cv2.putText(frame, f"Taking photo: {photo_taking}", (16, y), font, 0.45, photo_color, 1)
     y += 22
     cv2.putText(frame, f"FPS: {fps:.1f}", (16, y), font, 0.4, (0, 180, 0), 1)
 
@@ -113,8 +118,14 @@ def main():
     print("[2/2] Loading YOLO model...")
     detector = ObjectDetector()
 
-    print("[3/3] Loading wave detection model...")
+    print("[3/4] Loading wave detection model...")
     wave_detector = WaveDetector() if config.WAVE_ENABLED else None
+
+    print("[4/4] Loading photo-taking detection model...")
+    photo_detector = (
+        PhotoTakingDetector(pose_model=wave_detector._model if wave_detector else None)
+        if config.PHOTO_ENABLED else None
+    )
 
     print()
     print("Live window open. Press 'q' to quit, 's' for screenshot.")
@@ -125,6 +136,7 @@ def main():
     latest_detections = []
     latest_summary = {}
     latest_wave_results = []
+    latest_photo_results = []
     running = True
 
     # FPS tracking
@@ -163,6 +175,9 @@ def main():
             if wave_detector and frame_count % config.WAVE_EVERY == 0:
                 latest_wave_results = wave_detector.detect_waves(frame, frame_count)
 
+            if photo_detector and frame_count % config.PHOTO_EVERY == 0:
+                latest_photo_results = photo_detector.detect_photo_taking(frame, frame_count)
+
             # Print to terminal periodically
             if frame_count % (config.YOLO_EVERY * 15) == 0:
                 p = latest_summary.get("person_count", 0)
@@ -184,10 +199,15 @@ def main():
 
         if config.SHOW_COUNTS:
             waving_count = sum(1 for r in latest_wave_results if r["is_waving"])
-            display = draw_counts_overlay(display, latest_summary, display_fps, waving_count)
+            photo_count  = sum(1 for r in latest_photo_results if r["is_taking_photo"])
+            display = draw_counts_overlay(display, latest_summary, display_fps,
+                                          waving_count, photo_count)
 
         if wave_detector and latest_wave_results:
             display = wave_detector.draw_wave_indicators(display, latest_wave_results)
+
+        if photo_detector and latest_photo_results:
+            display = photo_detector.draw_photo_indicators(display, latest_photo_results)
 
         # Resize for display
         display = cv2.resize(display, (config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT))
@@ -208,6 +228,8 @@ def main():
     # -- Cleanup -------------------------------------------------------------
     reader.release()
     cv2.destroyAllWindows()
+    if photo_detector:
+        photo_detector.close()
 
     elapsed = time.time() - fps_timer
     print()

@@ -1,0 +1,4 @@
+{"timestamp": "2026-04-01T15:39:22", "event": "photo_taking", "frame_idx": 14, "track_id": 1, "confidence": 1.0, "x1": 516, "y1": 337, "x2": 548, "y2": 444}
+{"timestamp": "2026-04-01T15:42:43", "event": "photo_taking", "frame_idx": 944, "track_id": 77, "confidence": 1.0, "x1": 162, "y1": 427, "x2": 204, "y2": 480}
+{"timestamp": "2026-04-01T15:44:25", "event": "photo_taking", "frame_idx": 1302, "track_id": 128, "confidence": 1.0, "x1": 517, "y1": 353, "x2": 555, "y2": 465}
+{"timestamp": "2026-04-01T15:44:25", "event": "photo_taking", "frame_idx": 1302, "track_id": 129, "confidence": 1.0, "x1": 254, "y1": 316, "x2": 289, "y2": 415}

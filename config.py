@@ -34,3 +34,20 @@ WAVE_HOLD_SECONDS    = 2.0                # Seconds to hold wave indicator after
 WAVE_TRACKER_IOU     = 0.35               # IoU threshold for track matching
 WAVE_TRACKER_MISSING = 15                 # Frames before a track is discarded
 WAVE_SHOW_SKELETON   = True               # Draw arm skeleton on detected persons
+
+# -- Photo-Taking Detection --------------------------------------------------
+PHOTO_ENABLED          = True
+PHOTO_MODEL            = "yolov8m-pose.pt"   # Shared with wave detector
+PHOTO_EVERY            = 2                    # Run every N frames
+PHOTO_CONFIDENCE       = 0.40
+PHOTO_KEYPOINT_CONF    = 0.40                 # Min keypoint confidence to trust
+PHOTO_STILL_PIXELS     = 20                   # Max centroid delta between consecutive frames (px)
+PHOTO_HEAD_TOLERANCE   = 60                   # Nose-to-wrist-midpoint X tolerance (px)
+PHOTO_MIN_DURATION_SEC = 1.5                  # Seconds all conditions must hold continuously
+PHOTO_HISTORY_FRAMES   = 30                   # Rolling window size (pose inference frames, ~2 s)
+PHOTO_DISPLAY_CONF     = 0.75                 # Min confidence fraction to show label
+PHOTO_HOLD_SECONDS     = 2.0                  # Seconds to hold indicator after detection
+PHOTO_TRACKER_IOU      = 0.35                 # IoU threshold for track matching
+PHOTO_TRACKER_MISSING  = 15                   # Pose frames before a track is discarded
+PHOTO_LOG_CSV          = "photo_detections.csv"
+PHOTO_LOG_JSON         = "photo_detections.jsonl"
