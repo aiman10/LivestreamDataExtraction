@@ -6,3 +6,8 @@
 {"timestamp": "2026-04-01T15:53:01", "event": "photo_taking", "frame_idx": 292, "track_id": 54, "confidence": 1.0, "x1": 123, "y1": 288, "x2": 160, "y2": 402}
 {"timestamp": "2026-04-01T15:53:01", "event": "photo_taking", "frame_idx": 292, "track_id": 57, "confidence": 1.0, "x1": 291, "y1": 383, "x2": 338, "y2": 471}
 {"timestamp": "2026-04-01T15:54:20", "event": "photo_taking", "frame_idx": 618, "track_id": 110, "confidence": 1.0, "x1": 484, "y1": 311, "x2": 514, "y2": 403}
+{"timestamp": "2026-04-01T16:11:58", "event": "photo_taking", "frame_idx": 14, "track_id": 2, "confidence": 1.0, "x1": 305, "y1": 384, "x2": 347, "y2": 479}
+{"timestamp": "2026-04-01T16:11:58", "event": "photo_taking", "frame_idx": 14, "track_id": 7, "confidence": 1.0, "x1": 336, "y1": 320, "x2": 371, "y2": 419}
+{"timestamp": "2026-04-01T16:12:49", "event": "photo_taking", "frame_idx": 236, "track_id": 2, "confidence": 0.7667, "x1": 302, "y1": 384, "x2": 344, "y2": 480}
+{"timestamp": "2026-04-01T16:12:51", "event": "photo_taking", "frame_idx": 244, "track_id": 35, "confidence": 1.0, "x1": 219, "y1": 312, "x2": 252, "y2": 415}
+{"timestamp": "2026-04-01T16:14:16", "event": "photo_taking", "frame_idx": 518, "track_id": 80, "confidence": 1.0, "x1": 648, "y1": 398, "x2": 696, "y2": 480}

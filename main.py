@@ -35,6 +35,15 @@ def parse_args():
     return parser.parse_args()
 
 
+def crowd_level(people: int) -> tuple[str, tuple]:
+    """Return (label, BGR colour) for the current person count."""
+    if people > 15:
+        return "VERY CROWDED", (0, 0, 255)
+    if people >= 10:
+        return "CROWDED",      (0, 140, 255)
+    return "NORMAL",           (0, 200, 0)
+
+
 def draw_counts_overlay(frame, summary: dict, fps: float,
                         waving: int = 0, photo_taking: int = 0):
     """
@@ -44,7 +53,7 @@ def draw_counts_overlay(frame, summary: dict, fps: float,
     h, w = frame.shape[:2]
 
     # Semi-transparent black background
-    box_h = 174
+    box_h = 196
     box_w = 300
     cv2.rectangle(overlay, (8, 8), (8 + box_w, 8 + box_h), (0, 0, 0), -1)
     cv2.addWeighted(overlay, 0.55, frame, 0.45, 0, frame)
@@ -65,7 +74,9 @@ def draw_counts_overlay(frame, summary: dict, fps: float,
     umbrellas = summary.get("umbrella_count", 0)
     total = summary.get("total_objects", 0)
 
+    level_label, level_color = crowd_level(people)
     cv2.putText(frame, f"People: {people}   Vehicles: {vehicles}", (16, y), font, 0.45, white, 1)
+    cv2.putText(frame, level_label, (190, y), font, 0.42, level_color, 1)
     y += 22
     cv2.putText(frame, f"Bikes: {bikes}   Umbrellas: {umbrellas}", (16, y), font, 0.45, white, 1)
     y += 22
@@ -184,10 +195,11 @@ def main():
                 v = latest_summary.get("vehicle_count", 0)
                 u = latest_summary.get("umbrella_count", 0)
                 t = latest_summary.get("total_objects", 0)
+                c_label, _ = crowd_level(p)
                 print(
                     f"  Frame {frame_count:>6} | "
                     f"{display_fps:.1f} fps | "
-                    f"People: {p} | Vehicles: {v} | "
+                    f"People: {p} [{c_label}] | Vehicles: {v} | "
                     f"Umbrellas: {u} | Total: {t}"
                 )
 
