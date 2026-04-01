@@ -187,7 +187,7 @@ def main():
         elif key == ord("s"):
             os.makedirs("screenshots", exist_ok=True)
             path = f"screenshots/frame_{frame_count}.jpg"
-            cv2.imwrite(path, frame)
+            cv2.imwrite(path, display)
             print(f"  Screenshot saved: {path}")
 
     # -- Cleanup -------------------------------------------------------------
