@@ -15,11 +15,19 @@ Controls:
 
 import cv2
 import time
+import datetime
 import os
 import argparse
 import signal
 import sys
 from collections import Counter
+
+try:
+    from zoneinfo import ZoneInfo as _ZoneInfo
+    _DUBLIN_TZ = _ZoneInfo("Europe/Dublin")
+except ImportError:
+    import pytz as _pytz
+    _DUBLIN_TZ = _pytz.timezone("Europe/Dublin")
 
 import config
 from stream_capture import LivestreamReader
@@ -35,11 +43,48 @@ def parse_args():
     return parser.parse_args()
 
 
-def crowd_level(people: int) -> tuple[str, tuple]:
-    """Return (label, BGR colour) for the current person count."""
-    if people > 15:
+# Dublin time helpers
+def get_dublin_time() -> datetime.datetime:
+    return datetime.datetime.now(tz=_DUBLIN_TZ)
+
+
+def get_time_period(hour: int) -> str:
+    if hour < 6:
+        return "Night"
+    if hour < 12:
+        return "Morning"
+    if hour < 17:
+        return "Afternoon"
+    if hour < 21:
+        return "Evening"
+    return "Late Night"
+
+
+# BGR colours for each period label on the overlay
+_PERIOD_COLORS = {
+    "Night":      (139, 0,   0  ),  # dark blue
+    "Morning":    (0,   140, 255),  # orange
+    "Afternoon":  (0,   200, 0  ),  # green
+    "Evening":    (128, 0,   128),  # purple
+    "Late Night": (0,   0,   139),  # dark red
+}
+
+# Per-period crowd thresholds: (crowded_min, very_crowded_min)
+_PERIOD_THRESHOLDS = {
+    "Night":      (3,  8 ),
+    "Morning":    (8,  15),
+    "Afternoon":  (15, 25),
+    "Evening":    (12, 20),
+    "Late Night": (6,  12),
+}
+
+
+def crowd_level(people: int, period: str = "Afternoon") -> tuple[str, tuple]:
+    """Return (label, BGR colour) based on person count and time-of-day period."""
+    crowded_min, very_crowded_min = _PERIOD_THRESHOLDS.get(period, (15, 25))
+    if people > very_crowded_min:
         return " VERY CROWDED", (0, 0, 255)
-    if people >= 10:
+    if people >= crowded_min:
         return " CROWDED",      (0, 140, 255)
     return " NORMAL",           (0, 200, 0)
 
@@ -53,7 +98,7 @@ def draw_counts_overlay(frame, summary: dict, fps: float,
     h, w = frame.shape[:2]
 
     # Semi-transparent black background
-    box_h = 218
+    box_h = 210
     box_w = 300
     cv2.rectangle(overlay, (8, 8), (8 + box_w, 8 + box_h), (0, 0, 0), -1)
     cv2.addWeighted(overlay, 0.55, frame, 0.45, 0, frame)
@@ -67,18 +112,29 @@ def draw_counts_overlay(frame, summary: dict, fps: float,
     cv2.putText(frame, "Dublin Livestream Analytics", (16, y), font, 0.5, green, 1)
     y += 24
 
+    # Dublin time + period
+    dt = get_dublin_time()
+    period = get_time_period(dt.hour)
+    time_str = dt.strftime("%H:%M %Z")
+    period_color = _PERIOD_COLORS[period]
+    cv2.putText(frame, f"Dublin: {time_str}", (16, y), font, 0.45, white, 1)
+    cv2.putText(frame, f"  [{period}]", (140, y), font, 0.42, period_color, 1)
+    y += 22
+
     # Object counts
     people = summary.get("person_count", 0)
     vehicles = summary.get("vehicle_count", 0)
     bikes = summary.get("bicycle_count", 0)
     umbrellas = summary.get("umbrella_count", 0)
     total = summary.get("total_objects", 0)
-
     bg_people = summary.get("background_person_count", 0)
 
-    level_label, level_color = crowd_level(people)
+    level_label, level_color = crowd_level(people, period)
     cv2.putText(frame, f"People: {people}   Vehicles: {vehicles}", (16, y), font, 0.45, white, 1)
     cv2.putText(frame, level_label, (190, y), font, 0.42, level_color, 1)
+    y += 22
+    bg_color = (0, 128, 255) if bg_people > 0 else white
+    cv2.putText(frame, f"Background people: {bg_people}", (16, y), font, 0.45, bg_color, 1)
     y += 22
     cv2.putText(frame, f"Bikes: {bikes}   Umbrellas: {umbrellas}", (16, y), font, 0.45, white, 1)
     y += 22
@@ -197,11 +253,15 @@ def main():
                 v = latest_summary.get("vehicle_count", 0)
                 u = latest_summary.get("umbrella_count", 0)
                 t = latest_summary.get("total_objects", 0)
-                c_label, _ = crowd_level(p)
+                dt = get_dublin_time()
+                period = get_time_period(dt.hour)
+                time_str = dt.strftime("%H:%M %Z")
+                c_label, _ = crowd_level(p, period)
                 print(
                     f"  Frame {frame_count:>6} | "
                     f"{display_fps:.1f} fps | "
-                    f"People: {p} [{c_label}] | Vehicles: {v} | "
+                    f"{time_str} [{period}] | "
+                    f"People: {p} [{c_label.strip()}] | Vehicles: {v} | "
                     f"Umbrellas: {u} | Total: {t}"
                 )
 
