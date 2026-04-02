@@ -38,10 +38,10 @@ def parse_args():
 def crowd_level(people: int) -> tuple[str, tuple]:
     """Return (label, BGR colour) for the current person count."""
     if people > 15:
-        return "VERY CROWDED", (0, 0, 255)
+        return " VERY CROWDED", (0, 0, 255)
     if people >= 10:
-        return "CROWDED",      (0, 140, 255)
-    return "NORMAL",           (0, 200, 0)
+        return " CROWDED",      (0, 140, 255)
+    return " NORMAL",           (0, 200, 0)
 
 
 def draw_counts_overlay(frame, summary: dict, fps: float,
@@ -53,7 +53,7 @@ def draw_counts_overlay(frame, summary: dict, fps: float,
     h, w = frame.shape[:2]
 
     # Semi-transparent black background
-    box_h = 196
+    box_h = 218
     box_w = 300
     cv2.rectangle(overlay, (8, 8), (8 + box_w, 8 + box_h), (0, 0, 0), -1)
     cv2.addWeighted(overlay, 0.55, frame, 0.45, 0, frame)
@@ -73,6 +73,8 @@ def draw_counts_overlay(frame, summary: dict, fps: float,
     bikes = summary.get("bicycle_count", 0)
     umbrellas = summary.get("umbrella_count", 0)
     total = summary.get("total_objects", 0)
+
+    bg_people = summary.get("background_person_count", 0)
 
     level_label, level_color = crowd_level(people)
     cv2.putText(frame, f"People: {people}   Vehicles: {vehicles}", (16, y), font, 0.45, white, 1)

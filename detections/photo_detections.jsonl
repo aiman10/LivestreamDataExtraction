@@ -11,3 +11,4 @@
 {"timestamp": "2026-04-01T16:12:49", "event": "photo_taking", "frame_idx": 236, "track_id": 2, "confidence": 0.7667, "x1": 302, "y1": 384, "x2": 344, "y2": 480}
 {"timestamp": "2026-04-01T16:12:51", "event": "photo_taking", "frame_idx": 244, "track_id": 35, "confidence": 1.0, "x1": 219, "y1": 312, "x2": 252, "y2": 415}
 {"timestamp": "2026-04-01T16:14:16", "event": "photo_taking", "frame_idx": 518, "track_id": 80, "confidence": 1.0, "x1": 648, "y1": 398, "x2": 696, "y2": 480}
+{"timestamp": "2026-04-02T12:30:07", "event": "photo_taking", "frame_idx": 114, "track_id": 20, "confidence": 1.0, "x1": 185, "y1": 330, "x2": 232, "y2": 431}

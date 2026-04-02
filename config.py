@@ -13,6 +13,11 @@ YOLO_MODEL = "yolov8n.pt"      # Nano model, ~6 MB, auto-downloads first run
 YOLO_CONFIDENCE = 0.4           # Minimum detection confidence
 YOLO_EVERY = 2                  # Run detection every N frames (1 = every frame)
 
+# -- Background / Small Person Detection ------------------------------------
+SMALL_PERSON_CONF_THRESHOLD = 0.15   # Relaxed confidence for small person boxes
+SMALL_PERSON_HEIGHT_RATIO   = 0.15   # Box height < 15% of frame height = "small"
+BACKGROUND_ZONE_RATIO       = 0.60   # Top 60% of frame treated as background zone
+
 # -- Display -----------------------------------------------------------------
 DISPLAY_WIDTH = 960
 DISPLAY_HEIGHT = 540
