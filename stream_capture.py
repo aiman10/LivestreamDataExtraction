@@ -10,7 +10,7 @@ import cv2
 import subprocess
 import time
 import os
-from threading import Thread, Lock
+from threading import Thread, Lock, Event
 
 import config
 
@@ -62,6 +62,7 @@ class LivestreamReader:
         self.lock = Lock()
         self.frame = None
         self.ret = False
+        self._stop_event = Event()
         self.running = True
         self.cap = None
         self.fps = 30.0
@@ -72,7 +73,8 @@ class LivestreamReader:
         os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "timeout;5000000"
 
         self._connect()
-        Thread(target=self._reader_loop, daemon=True).start()
+        self._thread = Thread(target=self._reader_loop, daemon=True)
+        self._thread.start()
 
     def _connect(self):
         """Open the video stream."""
@@ -100,12 +102,15 @@ class LivestreamReader:
         """Background thread: continuously grab the newest frame."""
         fail_count = 0
 
-        while self.running:
+        while not self._stop_event.is_set():
             if self.cap is None or not self.cap.isOpened():
                 self._reconnect()
                 continue
 
             ret, frame = self.cap.read()
+
+            if self._stop_event.is_set():
+                break
 
             if ret:
                 fail_count = 0
@@ -124,6 +129,7 @@ class LivestreamReader:
         """Reconnect with exponential backoff."""
         if self._reconnect_attempts >= self._max_reconnects:
             print("[Stream] Max reconnect attempts reached. Stopping.")
+            self._stop_event.set()
             self.running = False
             return
 
@@ -143,12 +149,13 @@ class LivestreamReader:
         return False, None
 
     def is_running(self) -> bool:
-        return self.running
+        return self.running and not self._stop_event.is_set()
 
     def release(self):
-        """Clean up."""
+        """Signal the reader thread to stop, wait for it to exit, then release the cap."""
+        self._stop_event.set()
         self.running = False
-        time.sleep(0.2)
+        self._thread.join(timeout=3.0)
         if self.cap is not None:
             self.cap.release()
         print("[Stream] Released.")
