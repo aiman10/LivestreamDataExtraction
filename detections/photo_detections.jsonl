@@ -15,3 +15,6 @@
 {"timestamp": "2026-04-02T12:38:37", "event": "photo_taking", "frame_idx": 36, "track_id": 13, "confidence": 0.8571, "x1": 167, "y1": 323, "x2": 201, "y2": 425}
 {"timestamp": "2026-04-02T12:39:08", "event": "photo_taking", "frame_idx": 12, "track_id": 4, "confidence": 1.0, "x1": 95, "y1": 349, "x2": 137, "y2": 475}
 {"timestamp": "2026-04-02T12:52:12", "event": "photo_taking", "frame_idx": 36, "track_id": 2, "confidence": 0.8571, "x1": 226, "y1": 324, "x2": 258, "y2": 426}
+{"timestamp": "2026-04-02T15:30:53", "event": "photo_taking", "frame_idx": 58, "track_id": 28, "confidence": 0.8, "x1": 472, "y1": 337, "x2": 503, "y2": 446}
+{"timestamp": "2026-04-02T15:31:04", "event": "photo_taking", "frame_idx": 84, "track_id": 39, "confidence": 1.0, "x1": 224, "y1": 364, "x2": 262, "y2": 468}
+{"timestamp": "2026-04-03T13:20:34", "event": "photo_taking", "frame_idx": 118, "track_id": 28, "confidence": 1.0, "x1": 530, "y1": 371, "x2": 569, "y2": 479}
