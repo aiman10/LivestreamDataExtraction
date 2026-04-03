@@ -67,3 +67,8 @@ CROWD_SURGE_PCT             = 80      # % increase in count → surge alert
 CROWD_DISPERSAL_PCT         = 60      # % decrease in count → dispersal alert
 CROWD_HISTORY_SECONDS       = 10      # Rolling window for baseline (seconds)
 CROWD_GATHERING_FRAMES      = 8       # Consecutive dense frames → gathering alert
+
+# -- Data Logging ------------------------------------------------------------
+DATA_LOG_ENABLED    = True
+DATA_LOG_DIR        = "data"
+DATA_LOG_FILE       = "livestream_analytics.csv"

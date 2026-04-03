@@ -16,6 +16,7 @@ Controls:
 import cv2
 import time
 import datetime
+import json
 import os
 import argparse
 import signal
@@ -35,6 +36,7 @@ from object_detector import ObjectDetector
 from wave_detector import WaveDetector
 from photo_detector import PhotoTakingDetector
 from crowd_safety import CrowdSafetyAnalyzer
+from data_logger import DataLogger
 
 
 def parse_args():
@@ -201,6 +203,8 @@ def main():
     if crowd_analyzer:
         print("[5/5] Crowd safety analyzer ready.")
 
+    data_logger = DataLogger() if config.DATA_LOG_ENABLED else None
+
     print()
     print("Live window open. Press 'q' to quit, 's' for screenshot.")
     print("-" * 55)
@@ -263,6 +267,49 @@ def main():
                     for alert in latest_safety.alerts:
                         print(f"  [{alert.severity}] {alert.message}")
 
+            # -- Log all metrics to CSV ------------------------------------------
+            if data_logger:
+                dt = get_dublin_time()
+                period = get_time_period(dt.hour)
+                c_label, _ = crowd_level(
+                    latest_summary.get("person_count", 0), period)
+                waving = sum(1 for r in latest_wave_results if r["is_waving"])
+                photos = sum(
+                    1 for r in latest_photo_results if r["is_taking_photo"])
+
+                # Crowd safety fields
+                s_status = latest_safety.status if latest_safety else "NORMAL"
+                s_choke = len(latest_safety.choke_cells) if latest_safety else 0
+                s_baseline = latest_safety.baseline_count if latest_safety else 0.0
+                s_alerts = ""
+                s_grid_json = "[]"
+                s_max_density = 0
+                if latest_safety:
+                    s_alerts = ";".join(
+                        a.alert_type for a in latest_safety.alerts)
+                    s_grid_json = json.dumps(latest_safety.grid_density)
+                    s_max_density = max(
+                        (cell for row in latest_safety.grid_density
+                         for cell in row), default=0)
+
+                data_logger.log(
+                    timestamp=dt.isoformat(),
+                    dublin_time=dt.strftime("%H:%M:%S"),
+                    time_period=period,
+                    frame_number=frame_count,
+                    summary=latest_summary,
+                    crowd_level=c_label.strip(),
+                    waving_count=waving,
+                    photo_taking_count=photos,
+                    safety_status=s_status,
+                    choke_point_count=s_choke,
+                    grid_max_density=s_max_density,
+                    baseline_count=s_baseline,
+                    active_alerts=s_alerts,
+                    grid_density_json=s_grid_json,
+                    fps=display_fps,
+                )
+
             # Print to terminal periodically
             if frame_count % (config.YOLO_EVERY * 15) == 0:
                 p = latest_summary.get("person_count", 0)
@@ -323,6 +370,8 @@ def main():
     cv2.destroyAllWindows()
     if photo_detector:
         photo_detector.close()
+    if data_logger:
+        data_logger.close()
 
     elapsed = time.time() - fps_timer
     print()
