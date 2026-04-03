@@ -18,6 +18,7 @@ import numpy as np
 from ultralytics import YOLO
 
 import config
+from detection_logger import DetectionLogger
 
 # COCO-17 keypoint indices
 _L_SHOULDER = 5
@@ -52,6 +53,7 @@ class PersonTrack:
     is_waving:          bool = False
     _confirm_count:     int = 0                 # consecutive frames conditions met
     wave_display_until: float = 0.0             # epoch time — hold indicator until here
+    _logged:            bool = False            # suppress duplicate log entries per wave event
 
 
 class WaveDetector:
@@ -69,6 +71,10 @@ class WaveDetector:
         self._model = YOLO(config.WAVE_MODEL)
         self._tracks: dict[int, PersonTrack] = {}
         self._next_id = 0
+        self._logger = DetectionLogger(
+            csv_file=config.WAVE_LOG_CSV,
+            json_file=config.WAVE_LOG_JSON,
+        )
 
     # ------------------------------------------------------------------
     # Public methods
@@ -96,6 +102,19 @@ class WaveDetector:
             waving, side = self._evaluate_wave(track)
             track.is_waving = waving
 
+            # Log the start of each new wave event (suppress duplicates)
+            if track.is_waving and not track._logged:
+                self._logger.log(
+                    event="waving",
+                    frame_idx=frame_idx,
+                    track_id=track.track_id,
+                    confidence=1.0,
+                    box=track.box,
+                )
+                track._logged = True
+            elif not track.is_waving:
+                track._logged = False
+
             # Collect visible keypoints for skeleton drawing
             kps = {}
             if track.wrist_history:
@@ -119,6 +138,9 @@ class WaveDetector:
             })
 
         return results
+
+    def close(self) -> None:
+        self._logger.close()
 
     def draw_wave_indicators(self, display: np.ndarray, wave_results: list[dict]) -> np.ndarray:
         """

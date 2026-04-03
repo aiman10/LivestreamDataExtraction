@@ -39,6 +39,8 @@ WAVE_HOLD_SECONDS    = 2.0                # Seconds to hold wave indicator after
 WAVE_TRACKER_IOU     = 0.35               # IoU threshold for track matching
 WAVE_TRACKER_MISSING = 15                 # Frames before a track is discarded
 WAVE_SHOW_SKELETON   = True               # Draw arm skeleton on detected persons
+WAVE_LOG_CSV         = "wave_detections.csv"
+WAVE_LOG_JSON        = "wave_detections.jsonl"
 
 # -- Photo-Taking Detection --------------------------------------------------
 PHOTO_ENABLED          = True

@@ -368,6 +368,8 @@ def main():
     # -- Cleanup -------------------------------------------------------------
     reader.release()
     cv2.destroyAllWindows()
+    if wave_detector:
+        wave_detector.close()
     if photo_detector:
         photo_detector.close()
     if data_logger:

@@ -17,14 +17,17 @@ _FIELDS = ["timestamp", "event", "frame_idx", "track_id", "confidence",
 class DetectionLogger:
     """
     Writes one row per detection event to:
-      detections/<PHOTO_LOG_CSV>   — comma-separated, with header
-      detections/<PHOTO_LOG_JSON>  — JSON Lines (one object per line)
+      detections/<csv_file>    — comma-separated, with header
+      detections/<json_file>   — JSON Lines (one object per line)
+
+    csv_file / json_file default to the photo-detection filenames so that
+    existing call sites in photo_detector.py need no changes.
     """
 
-    def __init__(self):
+    def __init__(self, csv_file: str = None, json_file: str = None):
         os.makedirs("detections", exist_ok=True)
-        csv_path  = os.path.join("detections", config.PHOTO_LOG_CSV)
-        self._json_path = os.path.join("detections", config.PHOTO_LOG_JSON)
+        csv_path  = os.path.join("detections", csv_file  or config.PHOTO_LOG_CSV)
+        self._json_path = os.path.join("detections", json_file or config.PHOTO_LOG_JSON)
 
         write_header = not os.path.exists(csv_path)
         self._csv_fh = open(csv_path, "a", newline="", encoding="utf-8")

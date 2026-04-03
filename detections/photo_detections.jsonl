@@ -27,3 +27,8 @@
 {"timestamp": "2026-04-03T16:31:18", "event": "photo_taking", "frame_idx": 62, "track_id": 17, "confidence": 1.0, "x1": 788, "y1": 380, "x2": 834, "y2": 473}
 {"timestamp": "2026-04-03T16:32:42", "event": "photo_taking", "frame_idx": 370, "track_id": 21, "confidence": 0.7667, "x1": 300, "y1": 354, "x2": 337, "y2": 465}
 {"timestamp": "2026-04-03T16:33:51", "event": "photo_taking", "frame_idx": 626, "track_id": 107, "confidence": 0.8571, "x1": 282, "y1": 370, "x2": 336, "y2": 480}
+{"timestamp": "2026-04-03T16:51:55", "event": "photo_taking", "frame_idx": 872, "track_id": 197, "confidence": 1.0, "x1": 179, "y1": 325, "x2": 210, "y2": 422}
+{"timestamp": "2026-04-03T16:52:11", "event": "photo_taking", "frame_idx": 926, "track_id": 204, "confidence": 1.0, "x1": 251, "y1": 330, "x2": 293, "y2": 427}
+{"timestamp": "2026-04-03T16:52:22", "event": "photo_taking", "frame_idx": 964, "track_id": 212, "confidence": 1.0, "x1": 219, "y1": 361, "x2": 261, "y2": 478}
+{"timestamp": "2026-04-03T16:52:27", "event": "photo_taking", "frame_idx": 984, "track_id": 214, "confidence": 1.0, "x1": 255, "y1": 351, "x2": 293, "y2": 461}
+{"timestamp": "2026-04-03T16:52:43", "event": "photo_taking", "frame_idx": 1052, "track_id": 226, "confidence": 1.0, "x1": 726, "y1": 405, "x2": 778, "y2": 480}
