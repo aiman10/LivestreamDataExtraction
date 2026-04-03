@@ -34,6 +34,7 @@ from stream_capture import LivestreamReader
 from object_detector import ObjectDetector
 from wave_detector import WaveDetector
 from photo_detector import PhotoTakingDetector
+from crowd_safety import CrowdSafetyAnalyzer
 
 
 def parse_args():
@@ -196,6 +197,10 @@ def main():
         if config.PHOTO_ENABLED else None
     )
 
+    crowd_analyzer = CrowdSafetyAnalyzer() if config.CROWD_SAFETY_ENABLED else None
+    if crowd_analyzer:
+        print("[5/5] Crowd safety analyzer ready.")
+
     print()
     print("Live window open. Press 'q' to quit, 's' for screenshot.")
     print("-" * 55)
@@ -206,6 +211,8 @@ def main():
     latest_summary = {}
     latest_wave_results = []
     latest_photo_results = []
+    latest_safety = None
+    safety_cycle = 0
     running = True
 
     # FPS tracking
@@ -247,6 +254,15 @@ def main():
             if photo_detector and frame_count % config.PHOTO_EVERY == 0:
                 latest_photo_results = photo_detector.detect_photo_taking(frame, frame_count)
 
+            # Crowd safety analysis
+            if crowd_analyzer:
+                safety_cycle += 1
+                if safety_cycle % config.CROWD_SAFETY_EVERY == 0:
+                    latest_safety = crowd_analyzer.analyze(
+                        latest_detections, frame.shape)
+                    for alert in latest_safety.alerts:
+                        print(f"  [{alert.severity}] {alert.message}")
+
             # Print to terminal periodically
             if frame_count % (config.YOLO_EVERY * 15) == 0:
                 p = latest_summary.get("person_count", 0)
@@ -282,6 +298,9 @@ def main():
 
         if photo_detector and latest_photo_results:
             display = photo_detector.draw_photo_indicators(display, latest_photo_results)
+
+        if crowd_analyzer and latest_safety:
+            display = crowd_analyzer.draw_overlay(display, latest_safety)
 
         # Resize for display
         display = cv2.resize(display, (config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT))

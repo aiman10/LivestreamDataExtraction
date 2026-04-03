@@ -56,3 +56,14 @@ PHOTO_TRACKER_IOU      = 0.35                 # IoU threshold for track matching
 PHOTO_TRACKER_MISSING  = 15                   # Pose frames before a track is discarded
 PHOTO_LOG_CSV          = "photo_detections.csv"
 PHOTO_LOG_JSON         = "photo_detections.jsonl"
+
+# -- Crowd Safety & Anomaly Detection ----------------------------------------
+CROWD_SAFETY_ENABLED        = True
+CROWD_SAFETY_EVERY          = 2       # Analyze every N YOLO cycles
+CROWD_GRID_COLS             = 5       # Horizontal grid cells
+CROWD_GRID_ROWS             = 3       # Vertical grid cells
+CROWD_DENSITY_THRESHOLD     = 4       # People per cell → choke point
+CROWD_SURGE_PCT             = 80      # % increase in count → surge alert
+CROWD_DISPERSAL_PCT         = 60      # % decrease in count → dispersal alert
+CROWD_HISTORY_SECONDS       = 10      # Rolling window for baseline (seconds)
+CROWD_GATHERING_FRAMES      = 8       # Consecutive dense frames → gathering alert
