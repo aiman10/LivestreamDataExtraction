@@ -264,8 +264,8 @@ def main():
                 if safety_cycle % config.CROWD_SAFETY_EVERY == 0:
                     latest_safety = crowd_analyzer.analyze(
                         latest_detections, frame.shape)
-                    for alert in latest_safety.alerts:
-                        print(f"  [{alert.severity}] {alert.message}")
+                    # for alert in latest_safety.alerts:
+                    #     print(f"  [{alert.severity}] {alert.message}")
 
             # -- Log all metrics to CSV ------------------------------------------
             if data_logger:
@@ -311,22 +311,22 @@ def main():
                 )
 
             # Print to terminal periodically
-            if frame_count % (config.YOLO_EVERY * 15) == 0:
-                p = latest_summary.get("person_count", 0)
-                v = latest_summary.get("vehicle_count", 0)
-                u = latest_summary.get("umbrella_count", 0)
-                t = latest_summary.get("total_objects", 0)
-                dt = get_dublin_time()
-                period = get_time_period(dt.hour)
-                time_str = dt.strftime("%H:%M %Z")
-                c_label, _ = crowd_level(p, period)
-                print(
-                    f"  Frame {frame_count:>6} | "
-                    f"{display_fps:.1f} fps | "
-                    f"{time_str} [{period}] | "
-                    f"People: {p} [{c_label.strip()}] | Vehicles: {v} | "
-                    f"Umbrellas: {u} | Total: {t}"
-                )
+            # if frame_count % (config.YOLO_EVERY * 15) == 0:
+            #     p = latest_summary.get("person_count", 0)
+            #     v = latest_summary.get("vehicle_count", 0)
+            #     u = latest_summary.get("umbrella_count", 0)
+            #     t = latest_summary.get("total_objects", 0)
+            #     dt = get_dublin_time()
+            #     period = get_time_period(dt.hour)
+            #     time_str = dt.strftime("%H:%M %Z")
+            #     c_label, _ = crowd_level(p, period)
+            #     print(
+            #         f"  Frame {frame_count:>6} | "
+            #         f"{display_fps:.1f} fps | "
+            #         f"{time_str} [{period}] | "
+            #         f"People: {p} [{c_label.strip()}] | Vehicles: {v} | "
+            #         f"Umbrellas: {u} | Total: {t}"
+            #     )
 
         # -- Draw annotations on frame --------------------------------------
         display = frame.copy()
